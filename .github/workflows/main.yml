@@ -25,4 +25,4 @@ jobs:
         script: |
           cd /home/ubuntu/gogumacat/gogumacat-ci-cd
           git pull
-          python3 application.py
+          python3 app.py
