@@ -1,1 +1,0 @@
-# gogumacat-ci-cd
