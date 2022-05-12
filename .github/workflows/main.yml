@@ -25,4 +25,5 @@ jobs:
         script: |
           cd /home/ubuntu/gogumacat/gogumacat-ci-cd
           git pull
-          python app.py
+          nohup python app.py &
+          exit
