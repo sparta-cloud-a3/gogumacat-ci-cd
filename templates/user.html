@@ -92,7 +92,7 @@
             <figure class="media-left" style="align-self: center">
                 <a class="image is-96x96" href="#">
                     {% if user_info.profile_pic == "" %}
-                        <img class="is-rounded" src="{{ url_for('', filename=user_info.profile_pic_real) }}">
+                        <img class="is-rounded" src="{{ url_for('static', filename=user_info.profile_pic_real) }}">
                     {% else %}
                         <img class="is-rounded" src="{{ user_info.profile_pic }}">
                     {% endif %}
