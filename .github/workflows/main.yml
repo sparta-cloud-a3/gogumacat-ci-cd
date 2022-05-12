@@ -27,4 +27,3 @@ jobs:
           git pull
           nohup python app.py &
           exit
-          exit
