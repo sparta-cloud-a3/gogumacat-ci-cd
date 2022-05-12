@@ -23,7 +23,6 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USER }}
         script: |
-          cd /home/ubuntu/gogumacat
-          git reset --hard
-          git fetch
+          cd /home/ubuntu/gogumacat/gogumacat-ci-cd
           git pull
+          python3 application.py
