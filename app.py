@@ -20,6 +20,7 @@ thread = None
 thread_lock = Lock()
 
 client = MongoClient('mongodb://test:test@localhost', 27017)
+#되어주세요
 db = client.gogumacat
 
 app.config["TEMPLATES_AUTO_RELOAD"] = True
