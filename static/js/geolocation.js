@@ -46,7 +46,7 @@ function show_your_location(position) {
 function show_error_msg(error) {
     switch (error.code) {
         case error.PERMISSION_DENIED:
-            alert("이 문장은 사용자가 Geolocation API의 사용 요청을 거부했을 때 나타납니다!")
+            alert("Geolocation API의 사용 요청을 거부당했습니다.")
             break;
         case error.POSITION_UNAVAILABLE:
             alert("이 문장은 가져온 위치 정보를 사용할 수 없을 때 나타납니다!")
