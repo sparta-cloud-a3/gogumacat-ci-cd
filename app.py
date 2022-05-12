@@ -41,7 +41,8 @@ def home():
     except jwt.exceptions.DecodeError:
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
-### 로그인 페이지 시작
+
+### 로그인 페이지 시작 ###
 # 로그인 페이지 이동
 @app.route('/login')
 def login():
@@ -156,8 +157,10 @@ def check_dup_nick():
     nickname_receive = request.form['nickname_give']
     exists = bool(db.users.find_one({"nickname": nickname_receive}))
     return jsonify({'result': 'success', 'exists': exists})
+## 로그인 페이지 끝 ###
 
-### 메인 페이지 시작
+
+### 메인 페이지 시작 ###
 # 상품 목록 전체 조회
 @app.route('/listing', methods=['GET'])
 def listing_page():
@@ -296,9 +299,10 @@ def search_by_location():
         posts[i]['like_count'] = db.likes.count_documents({"idx": posts[i]['idx']})
 
     return jsonify({"posts": posts, 'limit': limit, 'page': page, 'last_page_num': last_page_num})
+### 메인페이지 끝 ###
 
 
-### 마이페이지 시작
+### 마이페이지 시작 ###
 # 각 사용자의 프로필과 글을 모아볼 수 있는 공간(마이페이지)로 이동
 @app.route('/user/<username>')
 def user(username):
@@ -370,6 +374,26 @@ def update_profile():
         return redirect(url_for("home"))
 
 
+# 개인정보 수정 위해서 비밀번호 확인
+@app.route('/check', methods=['POST'])
+def check_pw():
+    password_receive = request.form['password_give']
+
+    token_receive = request.cookies.get('mytoken')
+
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+
+        pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
+        result = bool(db.users.find_one({'username': payload["id"], 'password': pw_hash}))
+
+        return jsonify({'result': result})
+
+    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
+        return redirect(url_for("home"))
+
+
+# 아이디별 작성한 게시물과 좋아요한 게시물 불러옴(후에 리뷰와 댓글 추가 예정)
 @app.route("/get_posts", methods=['GET'])
 def get_my_posts():
     token_receive = request.cookies.get('mytoken')
@@ -392,9 +416,11 @@ def get_my_posts():
         return jsonify({'posts': posts, 'comments': comments, 'reviews': reviews, 'likes': likes})
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect(url_for("home"))
+### 마이패이지 끝 ###
 
 
-# 유저 개인의 물품 등록페이지 띄우기
+### 상품 등록 작성 페이지 시작 ###
+# 상품 등록 작성 페이지 이동
 @app.route('/posting/<username>')
 def post_page(username):
     token_receive = request.cookies.get('mytoken')
@@ -405,7 +431,7 @@ def post_page(username):
     return render_template("posting.html", user_info=user_info)
 
 
-# 등록할 내용 DB저장
+# 상품 등록 작성 저장
 @app.route('/user_post', methods=['POST'])
 def posting():
     print(request.form)
@@ -482,23 +508,11 @@ def posting():
         return jsonify({"result": "success", 'msg': '등록이 완료되었습니다.'})
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect()
+### 상품 등록 작성 패아자 끝 ###
 
 
-@app.route('/posts/<int:idx>')
-def detail(idx):
-    token_receive = request.cookies.get('mytoken')
-    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-    username = payload["id"]
-    user_info = db.users.find_one({"username": username}, {"_id": False})
-    post = db.posts.find_one({'idx': int(idx)}, {'_id': False})
-    user = db.users.find_one({'username': post["username"]}, {'_id': False})
-
-    post["like_count"] = db.likes.count_documents({"idx": int(idx)})
-    post["like_by_me"] = bool(db.likes.find_one({"idx": int(idx), "username": payload['id']}))
-
-    return render_template("post.html", post=post, user_info=user_info, user=user)
-
-
+### 채팅 페이지 시작 ###
+# 채팅 페이지 이동
 @app.route('/posts/<int:idx>/chat')
 def chat(idx):
     token_receive = request.cookies.get('mytoken')
@@ -597,8 +611,27 @@ def connect():
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client disconnected', request.sid)
+### 채팅 페이지 끝 ###
 
 
+### 상품 상세 페이지 시작 ###
+# 상품 상세 페이지 이동
+@app.route('/posts/<int:idx>')
+def detail(idx):
+    token_receive = request.cookies.get('mytoken')
+    payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+    username = payload["id"]
+    user_info = db.users.find_one({"username": username}, {"_id": False})
+    post = db.posts.find_one({'idx': int(idx)}, {'_id': False})
+    user = db.users.find_one({'username': post["username"]}, {'_id': False})
+
+    post["like_count"] = db.likes.count_documents({"idx": int(idx)})
+    post["like_by_me"] = bool(db.likes.find_one({"idx": int(idx), "username": payload['id']}))
+
+    return render_template("post.html", post=post, user_info=user_info, user=user)
+
+
+# 좋아요 누르면 업데이트
 @app.route('/update_like', methods=['POST'])
 def update_like():
     token_receive = request.cookies.get('mytoken')
@@ -622,24 +655,6 @@ def update_like():
         return redirect(url_for("home"))
 
 
-@app.route('/check', methods=['POST'])
-def check_pw():
-    password_receive = request.form['password_give']
-
-    token_receive = request.cookies.get('mytoken')
-
-    try:
-        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-
-        pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
-        result = bool(db.users.find_one({'username': payload["id"], 'password': pw_hash}))
-
-        return jsonify({'result': result})
-
-    except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
-        return redirect(url_for("home"))
-
-
 
 # 게시물 삭제
 @app.route('/posts/delete', methods=['POST'])
@@ -651,9 +666,11 @@ def delete_post():
     db.likes.delete_many({'idx': int(idx)})
 
     return {"result": "success"}
+### 상품 상세 페이지 끝 ###
 
 
-# update페이지로 이동할 때 사용하는 함수
+### 상품 수정 페이지 시작 ###
+# 상품 수정 페이지로 이동
 @app.route('/posting_update/<username>/<int:idx>')
 def update_page(username, idx):
     token_receive = request.cookies.get('mytoken')
@@ -671,6 +688,7 @@ def update_page(username, idx):
         return redirect(url_for("home"))
 
 
+# 상품 수정하고 저장
 @app.route('/user_post_update/<int:idx>', methods=['POST'])
 def updating(idx):
     # 토큰확인
@@ -743,7 +761,7 @@ def updating(idx):
         return jsonify({"result": "success", 'msg': '수정이 완료되었습니다.'})
     except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
         return redirect(url_for("home"))
-
+### 상품 수정 페이지 끝 ###
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
