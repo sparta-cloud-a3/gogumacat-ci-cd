@@ -1,4 +1,4 @@
-name: DevIT
+name: gogoumacat
 
 # Trigger deployment only on push to master branch
 on:
