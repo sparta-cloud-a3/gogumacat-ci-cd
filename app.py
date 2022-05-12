@@ -561,7 +561,6 @@ def my_room_event(message):
     payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
     username = payload['id']
     user_info = db.users.find_one({"username": username}, {"_id": False})
-    print(user_info['profile_pic'])
     if(user_info['profile_pic']=='') :
         emit('my_response',
              {'data': message['data'], 'count': session['receive_count'], 'type': 1, 'name': user_info['nickname'],
