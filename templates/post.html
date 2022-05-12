@@ -188,7 +188,7 @@
         {% if user_info.profile_pic == "" %}
             <img src="{{ user.profile_pic_real }}" id=user_profile>
         {% else %}
-            <img id=user_profile src="{{ user_info.profile_pic }}">
+            <img id=user_profile src="{{ user.profile_pic }}">
         {% endif %}
         {% if user_info.nickname == user.nickname %}
             <div class="menu dropdown" style="float: right;">
