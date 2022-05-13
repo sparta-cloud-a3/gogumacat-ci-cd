@@ -192,7 +192,7 @@
         </div>
     </div>
     <div class="user-info" id="user_information">
-        {% if user_info.profile_pic == "" %}
+        {% if user.profile_pic == "" %}
             <img src="{{ user.profile_pic_real }}" id=user_profile>
         {% else %}
             <img id=user_profile src="{{ user.profile_pic }}">
